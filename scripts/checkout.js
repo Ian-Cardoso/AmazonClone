@@ -5,11 +5,13 @@ import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js'
 import { deliveryOptions } from '../data/deliveryOption.js'
 
 
-dayjs()
+
 const today = dayjs();
 const deliveryDate = today.add(7, 'days')
-console.log(deliveryDate);
 console.log(deliveryDate.format('dddd, MMMM D'))
+
+function renderOrderSummary() {
+
 
 let cartSummaryHTML = ''
 
@@ -139,7 +141,10 @@ document.querySelectorAll('.js-delete-link')
     element.addEventListener('click', () => {
       const {productId, deliveryOptionId} = element.dataset
       updateDeliveryOption(productId, deliveryOptionId)
+      renderOrderSummary()
     })
   })
+}
 
+renderOrderSummary()
 
