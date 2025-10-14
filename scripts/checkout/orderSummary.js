@@ -1,9 +1,10 @@
-import { cart, removeFromCart, updateDeliveryOption } from '../../data/cart.js'
+import { cart, removeFromCart, updateDeliveryOption, updateCartItemQuantity } from '../../data/cart.js'
 import { products, getProduct } from '../../data/products.js'
 import { formatCurrency } from '../utils/money.js'
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js'
 import { deliveryOptions, getDeliveryOption } from '../../data/deliveryOption.js'
 import { renderPaymentSummary } from './paymentSummary.js'
+import { updateCheckoutItems } from '../utils/cartQuantity.js'
 
 export function renderOrderSummary() {
     let cartSummaryHTML = ''
@@ -43,9 +44,14 @@ cart.forEach((cartItem) => {
                 </div>
                 <div class="product-quantity">
                   <span>
-                    Quantity: <span class="quantity-label">${cartItem.quantity}</span>
+                    Quantity: 
+                    <select class="js-quantity-select" data-product-id="${matchingProduct.id}">
+                      ${[...Array(10)].map((_, i) => `
+                        <option value="${i+1}" ${cartItem.quantity === i+1 ? 'selected' : ''}>${i+1}</option>
+                      `).join('')}
+                    </select>
                   </span>
-                  <span class="update-quantity-link link-primary">
+                  <span class="update-quantity-link link-primary js-update-link" data-product-id="${matchingProduct.id}">
                     Update
                   </span>
                   <span class="delete-quantity-link link-primary js-delete-link" data-product-id="${matchingProduct.id}">
@@ -105,6 +111,9 @@ function deliveryOptionsHTML(matchingProduct, cartItem) {
 
 document.querySelector('.js-order-summary').innerHTML = cartSummaryHTML
 
+//Re-renderizando os eventos
+
+// Delete event
 document.querySelectorAll('.js-delete-link')
   .forEach((link) => {
     link.addEventListener('click', () => {
@@ -112,14 +121,15 @@ document.querySelectorAll('.js-delete-link')
       removeFromCart(productId)
 
       const container = document.querySelector(`.js-cart-item-container-${productId}`)
-
       container.remove()
 
       renderPaymentSummary()
+      updateCheckoutItems()
     })
   })
 
-  document.querySelectorAll('.js-delivery-option')
+// Delivery option event
+document.querySelectorAll('.js-delivery-option')
   .forEach((element) => {
     element.addEventListener('click', () => {
       const {productId, deliveryOptionId} = element.dataset
@@ -128,6 +138,18 @@ document.querySelectorAll('.js-delete-link')
       renderPaymentSummary()
     })
   })
+
+// Update quantity event
+document.querySelectorAll('.js-update-link')
+  .forEach((button) => {
+    button.addEventListener('click', () => {
+      const productId = button.dataset.productId
+      const select = document.querySelector(`.js-quantity-select[data-product-id="${productId}"]`)
+      const newQuantity = Number(select.value)
+      updateCartItemQuantity(productId, newQuantity)
+      renderOrderSummary()
+      renderPaymentSummary()
+      updateCheckoutItems()
+    })
+  })
 }
-
-

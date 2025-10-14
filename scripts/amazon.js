@@ -59,6 +59,8 @@ products.forEach((product) => {
 
 document.querySelector('.js-products-grid').innerHTML = productsHTML
 
+updateCartQuantity()
+
 function updateCartQuantity () {
   let cartQuantity = 0
             
@@ -72,15 +74,98 @@ function updateCartQuantity () {
 }
 
 document.querySelectorAll('.js-add-to-cart')
-    .forEach((button) => {
-        button.addEventListener('click', () => {
-            const productId = button.dataset.productId
+  .forEach((button) => {
+    button.addEventListener('click', () => {
+      const productId = button.dataset.productId
+      const productContainer = button.closest('.product-container')
+      const quantitySelect = productContainer.querySelector('select')
+      const selectedQuantity = Number(quantitySelect.value)
 
-            addToCart(productId)           
-
-            updateCartQuantity()
-
-        })
+      for (let i = 0; i < selectedQuantity; i++) {
+        addToCart(productId)
+      }
+      
+      updateCartQuantity()
     })
+  })
+
+const searchInput = document.querySelector('.search-bar')
+
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.trim().toLowerCase()
+  let filteredProducts = products
+
+  if (query) {
+    filteredProducts = products.filter(product =>
+      product.name.toLowerCase().includes(query)
+    )
+  }
+
+  let productsHTML = ''
+  filteredProducts.forEach((product) => {
+    productsHTML += `
+      <div class="product-container">
+        <div class="product-image-container">
+          <img class="product-image"
+            src="${product.image}">
+        </div>
+        <div class="product-name limit-text-to-2-lines">
+          ${product.name}
+        </div>
+        <div class="product-rating-container">
+          <img class="product-rating-stars"
+            src="${product.getStarsUrl()}">
+          <div class="product-rating-count link-primary">
+            ${product.rating.count}
+          </div>
+        </div>
+        <div class="product-price">
+          ${product.getPrice()}
+        </div>
+        <div class="product-quantity-container js-quantity-selector">
+          <select>
+            <option selected value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+        <div class="product-spacer"></div>
+        <div class="added-to-cart">
+          <img src="images/icons/checkmark.png">
+          Added
+        </div>
+        <button class="add-to-cart-button button-primary js-add-to-cart" data-product-id="${product.id}">
+          Add to Cart
+        </button>
+      </div>
+    `
+  })
+
+  document.querySelector('.js-products-grid').innerHTML = productsHTML
+
+  // Re-adiciona os eventos dos botões "Add to Cart" após filtrar
+  document.querySelectorAll('.js-add-to-cart')
+    .forEach((button) => {
+      button.addEventListener('click', () => {
+        const productId = button.dataset.productId
+        const productContainer = button.closest('.product-container')
+        const quantitySelect = productContainer.querySelector('select')
+        const selectedQuantity = Number(quantitySelect.value)
+
+        for (let i = 0; i < selectedQuantity; i++) {
+          addToCart(productId)
+        }
+
+        updateCartQuantity()
+      })
+    })
+})
 
 
