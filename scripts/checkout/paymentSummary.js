@@ -58,5 +58,28 @@ export function renderPaymentSummary(){
 
     document.querySelector('.js-payment-summary')
         .innerHTML = paymentSummaryHTML
+
+    const placeOrderButton = document.querySelector('.place-order-button')
+    if (placeOrderButton) {
+      placeOrderButton.addEventListener('click', () => {
+        // Salva o pedido e redireciona
+        saveOrder()
+        window.location.href = 'orders.html'
+      })
+    }
+
+    // Função para salvar o pedido
+    function saveOrder() {
+      // Recupera pedidos anteriores
+      const previousOrders = JSON.parse(localStorage.getItem('orders')) || []
+      // Adiciona o pedido atual
+      previousOrders.push({
+        date: new Date().toISOString(),
+        cart: JSON.parse(JSON.stringify(cart))
+      })
+      localStorage.setItem('orders', JSON.stringify(previousOrders))
+      // Limpa o carrinho
+      localStorage.removeItem('cart')
+    }
 }
 
